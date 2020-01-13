@@ -5,9 +5,10 @@ const Fusion = function(renderer) {
     const up = new Vector(0, 1, 0);
 
     const lines = new renderer.MeshLines();
-
     const attractors = new Array(Fusion.ATTRACTORS);
     const trails = new Array(Fusion.TRAILS);
+
+    let a = 0;
 
     for (let i = 0; i < attractors.length; ++i)
         attractors[i] = new Attractor(
@@ -37,10 +38,13 @@ const Fusion = function(renderer) {
     }
 
     this.update = timeStep => {
-
+        a += timeStep * 0.2;
     };
 
     this.draw = () => {
+        from.x = Math.cos(a) * dist;
+        from.z = Math.sin(a) * dist;
+
         renderer.clear();
         renderer.view(from, to, up);
         lines.draw(0);
