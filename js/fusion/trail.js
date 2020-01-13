@@ -7,7 +7,7 @@ const Trail = function(origin) {
         this.points[i] = new Vector();
 };
 
-Trail.STEPS = 200;
+Trail.STEPS = 100;
 Trail.GRAVITY_MULTIPLIER = 0.5;
 
 Trail.prototype.trace = function(attractors) {

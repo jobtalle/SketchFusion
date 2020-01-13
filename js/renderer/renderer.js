@@ -49,13 +49,8 @@ const Renderer = function(canvas, clearColor) {
     const programLines = new Shader(
         Renderer.SHADER_LINES_VERTEX,
         Renderer.SHADER_LINES_FRAGMENT,
-        ["transform", "shift"],
+        ["transform", "t"],
         ["position"]);
-    const programTubes = new Shader(
-        Renderer.SHADER_TUBES_VERTEX,
-        Renderer.SHADER_TUBES_FRAGMENT,
-        ["transform", "shift"],
-        ["center", "normal"]);
     let programCurrent = null;
 
     const updateMatrices = () => {
@@ -97,8 +92,8 @@ const Renderer = function(canvas, clearColor) {
             data.length = 0;
         };
 
-        this.add = (start, end) => {
-            data.push(start.x, start.y, start.z, end.x, end.y, end.z);
+        this.add = (start, fStart, end, fEnd) => {
+            data.push(start.x, start.y, start.z, fStart, end.x, end.y, end.z, fEnd);
 
             ++elements;
             updated = true;
@@ -114,8 +109,10 @@ const Renderer = function(canvas, clearColor) {
             updated = true;
         };
 
-        this.draw = shift => {
+        this.draw = progress => {
             setProgram(programLines);
+
+            gl.uniform1f(programLines.uT, progress);
 
             if (updated)
                 update();
@@ -123,7 +120,7 @@ const Renderer = function(canvas, clearColor) {
                 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
             gl.enableVertexAttribArray(programLines.aPosition);
-            gl.vertexAttribPointer(programLines.aPosition, 3, gl.FLOAT, false, 0, 0);
+            gl.vertexAttribPointer(programLines.aPosition, 4, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.LINES, 0, elements << 1);
         };
 
@@ -156,10 +153,8 @@ const Renderer = function(canvas, clearColor) {
 
     this.free = () => {
         programLines.free();
-        programTubes.free();
     };
 
-    gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -172,13 +167,17 @@ Renderer.Z_FAR = 500;
 Renderer.SHADER_VERSION = "#version 100\n";
 Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +
-    "attribute vec3 position;" +
+    "uniform float t;" +
+    "attribute vec4 position;" +
+    "varying mediump float alpha;" +
     "void main() {" +
-        "gl_Position = transform * vec4(position, 1.0);" +
+        "alpha = pow(0.5 - 0.5 * cos((position.w - t) * 6.28), 4.0);" +
+        "gl_Position = transform * vec4(position.xyz, 1.0);" +
     "}";
 Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
+    "varying mediump float alpha;" +
     "void main() {" +
-        "gl_FragColor = vec4(1.0, 1.0, 1.0, 0.1);" +
+        "gl_FragColor = vec4(1.0, 1.0, 1.0, alpha);" +
     "}";
 Renderer.SHADER_TUBES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +

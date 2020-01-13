@@ -8,7 +8,8 @@ const Fusion = function(renderer) {
     const attractors = new Array(Fusion.ATTRACTORS);
     const trails = new Array(Fusion.TRAILS);
 
-    let a = 0;
+    let progress = 0;
+    let a = 0.5 * Math.PI;
 
     for (let i = 0; i < attractors.length; ++i)
         attractors[i] = new Attractor(
@@ -34,11 +35,17 @@ const Fusion = function(renderer) {
         for (let i = 1; i < Trail.STEPS; ++i)
             lines.add(
                 trail.points[i - 1],
-                trail.points[i]);
+                (i - 1) / Trail.STEPS,
+                trail.points[i],
+                i / Trail.STEPS);
     }
 
     this.update = timeStep => {
         a += timeStep * 0.2;
+        progress += timeStep * 0.3;
+
+        if (progress > 1)
+            progress = 0;
     };
 
     this.draw = () => {
@@ -47,12 +54,12 @@ const Fusion = function(renderer) {
 
         renderer.clear();
         renderer.view(from, to, up);
-        lines.draw(0);
+        lines.draw(progress);
     };
 };
 
-Fusion.TRAILS = 3000;
+Fusion.TRAILS = 1000;
 Fusion.ATTRACTORS = 5;
-Fusion.ATTRACTOR_RADIUS_MIN = 5;
-Fusion.ATTRACTOR_RADIUS_MAX = 35;
+Fusion.ATTRACTOR_RADIUS_MIN = 1;
+Fusion.ATTRACTOR_RADIUS_MAX = 5;
 Fusion.ATTRACTOR_SPAWN_RADIUS = 30;
