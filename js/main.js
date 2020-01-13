@@ -2,8 +2,9 @@ const TIME_STEP_MAX = 0.1;
 
 const wrapper = document.getElementById("wrapper");
 const canvas = document.getElementById("renderer");
+const light = document.getElementById("light");
 const renderer = new Renderer(canvas, new Color(0, 0, 0, 0));
-const fusion = new Fusion(renderer);
+const fusion = new Fusion(renderer, light);
 let lastDate = new Date();
 
 const resize = () => {

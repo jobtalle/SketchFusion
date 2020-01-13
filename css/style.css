@@ -9,6 +9,20 @@ body {
     background: radial-gradient(circle at center, #393939 0, #141414, #000000 100%);
 }
 
+#light {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, #ffffff 0, rgba(0, 0, 0, 0) 100%);
+    position: absolute;
+    opacity: 0;
+    transition: 0.6s ease-out;
+}
+
+#light.active {
+    opacity: 1;
+    transition: 0.1s;
+}
+
 #wrapper #renderer {
     width: 100%;
     height: 100%;

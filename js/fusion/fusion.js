@@ -1,6 +1,6 @@
-const Fusion = function(renderer) {
-    const dist = 100;
-    const from = new Vector(0, dist, dist);
+const Fusion = function(renderer, lightElement) {
+    const dist = 60;
+    const from = new Vector();
     const to = new Vector(0, 0, 0);
     const up = new Vector(0, 1, 0);
 
@@ -8,6 +8,7 @@ const Fusion = function(renderer) {
     const attractors = new Array(Fusion.ATTRACTORS);
     const trails = new Array(Fusion.TRAILS);
 
+    let light = false;
     let progress = 0;
     let a = 0.5 * Math.PI;
 
@@ -41,8 +42,20 @@ const Fusion = function(renderer) {
     }
 
     this.update = timeStep => {
-        a += timeStep * 0.2;
-        progress += timeStep * 0.3;
+        // a += timeStep * 0.2;
+        progress += timeStep * 0.2;
+
+        if (progress > 0.15 && light === false) {
+            light = true;
+
+            lightElement.classList.toggle("active");
+        }
+
+        if (progress > 0.17 && light === true) {
+            light = false;
+
+            lightElement.classList.toggle("active");
+        }
 
         if (progress > 1)
             progress = 0;
@@ -54,12 +67,15 @@ const Fusion = function(renderer) {
 
         renderer.clear();
         renderer.view(from, to, up);
-        lines.draw(progress);
+        lines.draw(
+            progress,
+            Math.pow(0.5 - 0.5 * Math.cos(progress * (Math.PI + Math.PI)), Fusion.ALPHA_POWER));
     };
 };
 
+Fusion.ALPHA_POWER = 2;
 Fusion.TRAILS = 1000;
 Fusion.ATTRACTORS = 5;
-Fusion.ATTRACTOR_RADIUS_MIN = 1;
-Fusion.ATTRACTOR_RADIUS_MAX = 5;
-Fusion.ATTRACTOR_SPAWN_RADIUS = 30;
+Fusion.ATTRACTOR_RADIUS_MIN = 2;
+Fusion.ATTRACTOR_RADIUS_MAX = 6;
+Fusion.ATTRACTOR_SPAWN_RADIUS = 60;

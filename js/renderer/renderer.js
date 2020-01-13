@@ -49,7 +49,7 @@ const Renderer = function(canvas, clearColor) {
     const programLines = new Shader(
         Renderer.SHADER_LINES_VERTEX,
         Renderer.SHADER_LINES_FRAGMENT,
-        ["transform", "t"],
+        ["transform", "t", "alpha"],
         ["position"]);
     let programCurrent = null;
 
@@ -109,10 +109,11 @@ const Renderer = function(canvas, clearColor) {
             updated = true;
         };
 
-        this.draw = progress => {
+        this.draw = (progress, alpha) => {
             setProgram(programLines);
 
             gl.uniform1f(programLines.uT, progress);
+            gl.uniform1f(programLines.uAlpha, alpha);
 
             if (updated)
                 update();
@@ -168,16 +169,20 @@ Renderer.SHADER_VERSION = "#version 100\n";
 Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +
     "uniform float t;" +
+    "uniform float alpha;" +
     "attribute vec4 position;" +
-    "varying mediump float alpha;" +
+    "varying mediump float transparency;" +
     "void main() {" +
-        "alpha = pow(0.5 - 0.5 * cos((position.w - t) * 6.28), 4.0);" +
-        "gl_Position = transform * vec4(position.xyz, 1.0);" +
+        "if (position.w > t)" +
+            "transparency = 0.0;" +
+        "else " +
+            "transparency = alpha * pow(1.0 - (t - position.w), 10.0);" +
+        "gl_Position = transform * vec4(position.xyz * pow(t, 0.3) * length(position.xyz) * 0.01, 1.0);" +
     "}";
 Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
-    "varying mediump float alpha;" +
+    "varying mediump float transparency;" +
     "void main() {" +
-        "gl_FragColor = vec4(1.0, 1.0, 1.0, alpha);" +
+        "gl_FragColor = vec4(1.0, 1.0, 1.0, transparency);" +
     "}";
 Renderer.SHADER_TUBES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +
