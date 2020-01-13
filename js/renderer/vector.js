@@ -8,6 +8,14 @@ Vector.prototype.copy = function() {
     return new Vector(this.x, this.y, this.z);
 };
 
+Vector.prototype.set = function(other) {
+    this.x = other.x;
+    this.y = other.y;
+    this.z = other.z;
+
+    return this;
+};
+
 Vector.prototype.negate = function() {
     this.x = -this.x;
     this.y = -this.y;

@@ -4,6 +4,8 @@ const Renderer = function(canvas, clearColor) {
     const matrixProjection = new Matrix();
     const matrixView = new Matrix();
     const matrixAll = new Matrix();
+    let width = canvas.width;
+    let height = canvas.height;
 
     const Shader = function(vertex, fragment, uniforms, attributes) {
         const shaderVertex = gl.createShader(gl.VERTEX_SHADER);
@@ -85,7 +87,7 @@ const Renderer = function(canvas, clearColor) {
 
         const update = () => {
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STREAM_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
 
             updated = false;
         };
@@ -114,7 +116,6 @@ const Renderer = function(canvas, clearColor) {
 
         this.draw = shift => {
             setProgram(programLines);
-            gl.uniform3f(programLines.uShift, shift.x, shift.y, shift.z);
 
             if (updated)
                 update();
@@ -130,98 +131,6 @@ const Renderer = function(canvas, clearColor) {
             gl.deleteBuffer(buffer);
         };
     };
-
-    this.MeshTubes = function() {
-        const up = new Vector(0, 1, 0);
-        const down = new Vector(0, 1, 0);
-        const bufferVertices = gl.createBuffer();
-        const bufferIndices = gl.createBuffer();
-        const vertices = [];
-        const indices = [];
-        let vertexCount = 0;
-        let updated = false;
-
-        const precision = 9;
-        const ring = [];
-
-        for (let i = 0; i < precision; ++i)
-            ring.push(new Vector(
-                Math.cos((i / precision) * Math.PI * 2),
-                Math.sin((i / precision) * Math.PI * 2),
-                0));
-
-        const update = () => {
-            gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STREAM_DRAW);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufferIndices);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(indices), gl.STREAM_DRAW);
-
-            updated = false;
-        };
-
-        this.add = (startPosition, startDirection, endPosition, endDirection) => {
-            const startX = startDirection.cross(up).normalize();
-            const startY = startX.cross(startDirection).normalize();
-            const endX = endDirection.cross(up).normalize();
-            const endY = endX.cross(endDirection).normalize();
-
-            for (let i = 0; i < ring.length; ++i) {
-                const index = i << 1;
-                const indexNext = i + 1 === ring.length ? 0 : index + 2;
-
-                vertices.push(
-                    startPosition.x,
-                    startPosition.y,
-                    startPosition.z,
-                    startX.x * ring[i].x + startY.x * ring[i].y,
-                    startX.y * ring[i].x + startY.y * ring[i].y,
-                    startX.z * ring[i].x + startY.z * ring[i].y,
-                    endPosition.x,
-                    endPosition.y,
-                    endPosition.z,
-                    endX.x * ring[i].x + endY.x * ring[i].y,
-                    endX.y * ring[i].x + endY.y * ring[i].y,
-                    endX.z * ring[i].x + endY.z * ring[i].y,);
-                indices.push(
-                    vertexCount + index,
-                    vertexCount + indexNext,
-                    vertexCount + indexNext + 1,
-                    vertexCount + indexNext + 1,
-                    vertexCount + index + 1,
-                    vertexCount + index);
-            }
-
-            vertexCount += ring.length + ring.length;
-
-            updated = true;
-        };
-
-        this.draw = shift => {
-            setProgram(programTubes);
-            gl.uniform3f(programTubes.uShift, shift.x, shift.y, shift.z);
-
-            if (updated)
-                update();
-            else {
-                gl.bindBuffer(gl.ARRAY_BUFFER, bufferVertices);
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufferIndices);
-            }
-
-            gl.enableVertexAttribArray(programTubes.aCenter);
-            gl.vertexAttribPointer(programTubes.aCenter, 3, gl.FLOAT, false, 24, 0);
-            gl.enableVertexAttribArray(programTubes.aNormal);
-            gl.vertexAttribPointer(programTubes.aNormal, 3, gl.FLOAT, false, 24, 12);
-            gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_INT, 0);
-        };
-
-        this.free = () => {
-            gl.deleteBuffer(bufferVertices);
-            gl.deleteBuffer(bufferIndices);
-        };
-    };
-
-    let width = canvas.width;
-    let height = canvas.height;
 
     this.resize = (w, h) => {
         width = w;
@@ -252,23 +161,24 @@ const Renderer = function(canvas, clearColor) {
 
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.CULL_FACE);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     gl.getExtension("OES_element_index_uint");
 };
 
 Renderer.Z_NEAR = 0.1;
-Renderer.Z_FAR = 100;
+Renderer.Z_FAR = 500;
 Renderer.SHADER_VERSION = "#version 100\n";
 Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +
-    "uniform vec3 shift;" +
     "attribute vec3 position;" +
     "void main() {" +
-        "gl_Position = transform * vec4(position + shift, 1.0);" +
+        "gl_Position = transform * vec4(position, 1.0);" +
     "}";
 Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
     "void main() {" +
-        "gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);" +
+        "gl_FragColor = vec4(1.0, 1.0, 1.0, 0.1);" +
     "}";
 Renderer.SHADER_TUBES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +
