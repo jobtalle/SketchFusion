@@ -1,5 +1,5 @@
 const Fusion = function(renderer, lightElement) {
-    const dist = 50;
+    const dist = 40;
     const from = new Vector();
     const to = new Vector(0, 0, 0);
     const up = new Vector(0, 1, 0);
@@ -11,6 +11,7 @@ const Fusion = function(renderer, lightElement) {
     let light = 0;
     let progress = 0;
     let meshIndex = 0;
+    let canPrepare = false;
 
     for (let i = 0; i < meshes.length; ++i)
         meshes[i] = new renderer.MeshLines(trails);
@@ -40,15 +41,17 @@ const Fusion = function(renderer, lightElement) {
         for (const trail of trails)
             trail.trace(attractors);
 
-        meshes[meshIndex].upload();
+        meshes[(meshIndex + 1) % Fusion.MESH_COUNT].upload();
     };
 
     const prepare = () => {
-        if (++meshIndex === Fusion.MESH_COUNT)
-            meshIndex = 0;
-
         makeAttractors();
         traceTrails();
+    };
+
+    const nextMesh = () => {
+        if (++meshIndex === Fusion.MESH_COUNT)
+            meshIndex = 0;
     };
 
     const drawMesh = (mesh, progress) => {
@@ -61,10 +64,17 @@ const Fusion = function(renderer, lightElement) {
     this.update = timeStep => {
         progress += timeStep * Fusion.CYCLE_SPEED;
 
+        if (canPrepare) {
+            prepare();
+
+            canPrepare = false;
+        }
+
         if (light === 0) {
             if (progress > Fusion.FLASH_START) {
                 lightElement.classList.add("active");
                 light = 1;
+                canPrepare = true;
             }
         }
         else if (light === 1) {
@@ -78,7 +88,7 @@ const Fusion = function(renderer, lightElement) {
             progress -= Fusion.INTERVAL;
             light = 0;
 
-            prepare();
+            nextMesh();
         }
     };
 
@@ -104,14 +114,16 @@ const Fusion = function(renderer, lightElement) {
         }
     };
 
-    for (let i = 0; i < Fusion.MESH_COUNT; ++i)
+    for (let i = 0; i < Fusion.MESH_COUNT; ++i) {
         prepare();
+        nextMesh();
+    }
 };
 
 
 Fusion.INTERVAL = 0.4;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
-Fusion.CYCLE_SPEED = 0.2;
+Fusion.CYCLE_SPEED = 0.15;
 Fusion.FLASH_START = 0.15;
 Fusion.FLASH_END = 0.16;
 Fusion.ALPHA_POWER = 1.5;
