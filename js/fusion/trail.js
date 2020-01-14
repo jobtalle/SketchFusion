@@ -1,5 +1,5 @@
 const Trail = function(origin) {
-    this.velocityInitial = origin.copy().negate().multiply(Trail.VELOCITY_INITIAL + Trail.VELOCITY_RANDOM * Math.random());
+    this.velocityInitial = origin.copy().negate().multiply(Trail.VELOCITY_INITIAL);
     this.velocity = new Vector();
     this.origin = origin;
     this.points = new Array(Trail.STEPS);
@@ -19,7 +19,6 @@ Trail.makeGravityInfluences = function() {
 
 Trail.STEPS = 64;
 Trail.VELOCITY_INITIAL = 0.05;
-Trail.VELOCITY_RANDOM = 0;
 Trail.GRAVITY_MULTIPLIER = 3.9;
 Trail.GRAVITY_POWER = 2;
 Trail.GRAVITY_INFLUENCES = Trail.makeGravityInfluences();

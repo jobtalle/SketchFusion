@@ -1,6 +1,5 @@
 const Fusion = function(renderer, lightElement) {
-    const dist = 20;
-    const from = new Vector();
+    const from = new Vector(0, 0, Fusion.ZOOM);
     const to = new Vector(0, 0, 0);
     const up = new Vector(0, 1, 0);
 
@@ -22,13 +21,12 @@ const Fusion = function(renderer, lightElement) {
 
     for (let i = 0; i < trails.length; ++i) {
         const r = Math.PI * 2 * i / trails.length;
-        const d = 100;
 
         trails[i] = new Trail(
             new Vector(
-                Math.cos(r) * d,
-                Math.sin(r) * d,
-                -15));
+                Math.cos(r) * Fusion.TRAILS_RADIUS,
+                Math.sin(r) * Fusion.TRAILS_RADIUS,
+                Fusion.TRAIL_Z));
     }
 
     const makeAttractors = () => {
@@ -96,9 +94,6 @@ const Fusion = function(renderer, lightElement) {
     };
 
     this.draw = () => {
-        from.x = 0;
-        from.z = dist;
-
         renderer.clear();
         renderer.view(from, to, up);
 
@@ -118,6 +113,11 @@ const Fusion = function(renderer, lightElement) {
                 break;
         }
 
+        if (progress > Fusion.FLASH_START && progress < Fusion.FLASH_END)
+            renderer.renderGradient(
+                Math.pow(1 - (progress - Fusion.FLASH_START) / (Fusion.FLASH_END - Fusion.FLASH_START), 6),
+                2);
+
         renderer.toMain();
         renderer.renderBuffer();
     };
@@ -129,10 +129,14 @@ const Fusion = function(renderer, lightElement) {
 };
 
 
+Fusion.ZOOM = 15;
+Fusion.TRAIL_Z = -15;
+Fusion.TRAILS_RADIUS = 100;
 Fusion.INTERVAL = 0.3;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
 Fusion.CYCLE_SPEED = 0.1;
 Fusion.FLASH_START = 0.14;
+Fusion.FLASH_END = 0.3;
 Fusion.ALPHA_POWER = 1.6;
 Fusion.ALPHA_PROGRESS_POWER = 0.7;
 Fusion.TRAILS = 800;
