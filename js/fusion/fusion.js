@@ -129,7 +129,7 @@ const Fusion = function(renderer, lightElement) {
 };
 
 
-Fusion.ZOOM = 15;
+Fusion.ZOOM = 25;
 Fusion.TRAIL_Z = -15;
 Fusion.TRAILS_RADIUS = 100;
 Fusion.INTERVAL = 0.3;
