@@ -24,7 +24,7 @@ const Fusion = function(renderer, lightElement) {
             new Vector(
                 Math.cos(r) * d,
                 Math.sin(r) * d,
-                0));
+                -15));
     }
 
     const makeAttractors = () => {
@@ -135,5 +135,5 @@ Fusion.TRAILS = 800;
 Fusion.ATTRACTORS = 5;
 Fusion.ATTRACTOR_RADIUS_MIN = 6;
 Fusion.ATTRACTOR_RADIUS_MAX = 17.5;
-Fusion.ATTRACTOR_SPAWN_RADIUS = 60;
+Fusion.ATTRACTOR_SPAWN_RADIUS = 70;
 Fusion.ATTRACTOR_SPAWN_RADIUS_POWER = 2.5;
