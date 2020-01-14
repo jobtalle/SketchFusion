@@ -49,7 +49,7 @@ const Renderer = function(canvas, clearColor) {
     const programLines = new Shader(
         Renderer.SHADER_LINES_VERTEX,
         Renderer.SHADER_LINES_FRAGMENT,
-        ["transform", "t", "alpha"],
+        ["transform", "t", "alpha", "flashStart"],
         ["position"]);
     let programCurrent = null;
 
@@ -74,55 +74,41 @@ const Renderer = function(canvas, clearColor) {
         }
     };
 
-    this.MeshLines = function() {
+    this.MeshLines = function(trails) {
         const buffer = gl.createBuffer();
-        const data = [];
-        let elements = 0;
-        let updated = false;
+        const elements = Fusion.TRAILS * (Trail.STEPS - 1) << 1;
+        const data = new Array(elements * 8);
 
-        const update = () => {
+        this.upload = () => {
+            for (let trail = 0; trail < trails.length; ++trail) for (let i = 1; i < Trail.STEPS; ++i) {
+                const ip = i - 1;
+                const index = trail * (Trail.STEPS - 1) * 8 + ip * 8;
+
+                data[index] = trails[trail].points[ip].x;
+                data[index + 1] = trails[trail].points[ip].y;
+                data[index + 2] = trails[trail].points[ip].z;
+                data[index + 3] = ip / Trail.STEPS;
+                data[index + 4] = trails[trail].points[i].x;
+                data[index + 5] = trails[trail].points[i].y;
+                data[index + 6] = trails[trail].points[i].z;
+                data[index + 7] = i / Trail.STEPS;
+            }
+
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
-
-            updated = false;
         };
 
-        this.clear = () => {
-            elements = 0;
-            data.length = 0;
-        };
-
-        this.add = (start, fStart, end, fEnd) => {
-            data.push(start.x, start.y, start.z, fStart, end.x, end.y, end.z, fEnd);
-
-            ++elements;
-            updated = true;
-        };
-
-        this.append = end => {
-            for (let i = 0; i < 3; ++i)
-                data.push(data[data.length - 3]);
-
-            data.push(end.x, end.y, end.z);
-
-            ++elements;
-            updated = true;
-        };
-
-        this.draw = (progress, alpha) => {
+        this.draw = (progress, alpha, flashStart) => {
             setProgram(programLines);
 
             gl.uniform1f(programLines.uT, progress);
             gl.uniform1f(programLines.uAlpha, alpha);
+            gl.uniform1f(programLines.uFlashStart, flashStart);
 
-            if (updated)
-                update();
-            else
-                gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
             gl.enableVertexAttribArray(programLines.aPosition);
             gl.vertexAttribPointer(programLines.aPosition, 4, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.LINES, 0, elements << 1);
+            gl.drawArrays(gl.LINES, 0, elements);
         };
 
         this.free = () => {
@@ -133,15 +119,16 @@ const Renderer = function(canvas, clearColor) {
     this.resize = (w, h) => {
         width = w;
         height = h;
-        matrixProjection.perspective(Math.PI * 0.5, w / h, Renderer.Z_NEAR, Renderer.Z_FAR);
+        matrixProjection.perspective(Renderer.ANGLE, w / h, Renderer.Z_NEAR, Renderer.Z_FAR);
 
         gl.viewport(0, 0, width, height);
 
         updateMatrices();
     };
 
-    this.view = (from, to, up) => {
+    this.view = (from, to, up, angle) => {
         matrixView.lookAt(from, to, up);
+        matrixView.multiply(Matrix.makeRotateZ(angle));
 
         updateMatrices();
     };
@@ -165,39 +152,27 @@ const Renderer = function(canvas, clearColor) {
 
 Renderer.Z_NEAR = 0.1;
 Renderer.Z_FAR = 500;
+Renderer.ANGLE = Math.PI * 0.5;
 Renderer.SHADER_VERSION = "#version 100\n";
 Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +
     "uniform float t;" +
     "uniform float alpha;" +
+    "uniform float flashStart;" +
     "attribute vec4 position;" +
     "varying mediump float transparency;" +
     "void main() {" +
         "if (position.w > t)" +
             "transparency = 0.0;" +
-        "else " +
-            "transparency = alpha * pow(1.0 - (t - position.w), 10.0);" +
-        "gl_Position = transform * vec4(position.xyz * pow(t, 0.3) * length(position.xyz) * 0.01, 1.0);" +
+        "else {" +
+            "transparency = alpha * pow(max(0.0, 1.0 - (t - position.w) * 2.0), 3.0);" +
+            "if (t < flashStart) transparency = 0.1 * position.w / t;" +
+        "}" +
+        "gl_Position = transform * vec4(position.xyz * pow(t, 0.7) * length(position.xyz) * 0.01, 1.0);" +
     "}";
 Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
     "varying mediump float transparency;" +
     "void main() {" +
-        "gl_FragColor = vec4(1.0, 1.0, 1.0, transparency);" +
-    "}";
-Renderer.SHADER_TUBES_VERTEX = Renderer.SHADER_VERSION +
-    "uniform mat4 transform;" +
-    "uniform vec3 shift;" +
-    "attribute vec3 center;" +
-    "attribute vec3 normal;" +
-    "varying mediump vec3 v_normal;" +
-    "void main() {" +
-        "v_normal = normal;" +
-        "gl_Position = transform * vec4(center + shift + normal * 0.1, 1.0);" +
-    "}";
-Renderer.SHADER_TUBES_FRAGMENT = Renderer.SHADER_VERSION +
-    "varying mediump vec3 v_normal;" +
-    "void main() {" +
-        "mediump vec3 light = normalize(vec3(0, 0.5, -1.0));" +
-        "mediump float lightness = max(0.3, dot(normalize(v_normal) * 0.8, light));" +
-        "gl_FragColor = vec4(vec3(lightness), 1.0);" +
+        "if (transparency == 0.0) discard;" +
+        "gl_FragColor = vec4(1.0, 0.97, 0.9, transparency);" +
     "}";
