@@ -18,7 +18,7 @@ const Fusion = function(renderer, lightElement) {
 
     for (let i = 0; i < trails.length; ++i) {
         const r = Math.PI * 2 * i / trails.length;
-        const d = 120;
+        const d = 100;
 
         trails[i] = new Trail(
             new Vector(
