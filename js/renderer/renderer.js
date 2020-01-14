@@ -142,25 +142,29 @@ Renderer.ANGLE = Math.PI * 0.5;
 Renderer.SHADER_VERSION = "#version 100\n";
 Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +
-    "uniform float t;" +
-    "uniform float alpha;" +
-    "uniform float flashStart;" +
+    "uniform mediump float t;" +
     "attribute vec4 position;" +
-    "varying mediump float transparency;" +
+    "varying mediump float f;" +
     "void main() {" +
-        "if (position.w > t)" +
-            "transparency = 0.0;" +
-        "else {" +
-            "if (t < flashStart) " +
-                "transparency = 0.2 * position.w / t;" +
-            "else " +
-                "transparency = min(position.w, alpha * pow(1.0 - (t - position.w), 8.0));" +
-        "}" +
+        "f = position.w;" +
         "gl_Position = transform * vec4(position.xyz * length(position.xyz) * 0.005 * pow(t, 0.3), 1.0);" +
     "}";
 Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
-    "varying mediump float transparency;" +
+    "uniform mediump float t;" +
+    "uniform mediump float alpha;" +
+    "uniform mediump float flashStart;" +
+    "varying mediump float f;" +
     "void main() {" +
-        "if (transparency == 0.0) discard;" +
+        "mediump float transparency;" +
+
+        "if (f < t) {" +
+            "if (t < flashStart)" +
+                "transparency = 0.1 * alpha * (f / flashStart);" +
+            "else " +
+                "transparency = alpha * (pow(1.0 - pow(abs(f - t), 0.5), 11.0));" +
+        "}" +
+        "else " +
+            "discard;" +
+
         "gl_FragColor = vec4(1.0, 0.97, 0.9, transparency);" +
     "}";

@@ -34,7 +34,8 @@ const Fusion = function(renderer, lightElement) {
                     -Fusion.ATTRACTOR_SPAWN_RADIUS + Fusion.ATTRACTOR_SPAWN_RADIUS * 2 * Math.random(),
                     -Fusion.ATTRACTOR_SPAWN_RADIUS + Fusion.ATTRACTOR_SPAWN_RADIUS * 2 * Math.random(),
                     -Fusion.ATTRACTOR_SPAWN_RADIUS + Fusion.ATTRACTOR_SPAWN_RADIUS * 2 * Math.random()),
-                Fusion.ATTRACTOR_RADIUS_MIN + (Fusion.ATTRACTOR_RADIUS_MAX - Fusion.ATTRACTOR_RADIUS_MIN) * Math.random());
+                Fusion.ATTRACTOR_RADIUS_MIN + (Fusion.ATTRACTOR_RADIUS_MAX - Fusion.ATTRACTOR_RADIUS_MIN) *
+                    Math.pow(Math.random(), Fusion.ATTRACTOR_SPAWN_RADIUS_POWER));
     };
 
     const traceTrails = () => {
@@ -78,10 +79,8 @@ const Fusion = function(renderer, lightElement) {
             }
         }
         else if (light === 1) {
-            if (progress > Fusion.FLASH_END) {
-                lightElement.classList.remove("active");
-                light = 2;
-            }
+            lightElement.classList.remove("active");
+            light = 2;
         }
 
         if (progress > Fusion.INTERVAL) {
@@ -121,15 +120,15 @@ const Fusion = function(renderer, lightElement) {
 };
 
 
-Fusion.INTERVAL = 0.4;
+Fusion.INTERVAL = 0.3;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
-Fusion.CYCLE_SPEED = 0.15;
-Fusion.FLASH_START = 0.15;
-Fusion.FLASH_END = 0.16;
+Fusion.CYCLE_SPEED = 0.1;
+Fusion.FLASH_START = 0.16;
 Fusion.ALPHA_POWER = 1.5;
-Fusion.ALPHA_PROGRESS_POWER = 0.4;
-Fusion.TRAILS = 1024;
-Fusion.ATTRACTORS = 7;
-Fusion.ATTRACTOR_RADIUS_MIN = 2;
-Fusion.ATTRACTOR_RADIUS_MAX = 9;
+Fusion.ALPHA_PROGRESS_POWER = 0.7;
+Fusion.TRAILS = 800;
+Fusion.ATTRACTORS = 5;
+Fusion.ATTRACTOR_RADIUS_MIN = 4;
+Fusion.ATTRACTOR_RADIUS_MAX = 14;
 Fusion.ATTRACTOR_SPAWN_RADIUS = 70;
+Fusion.ATTRACTOR_SPAWN_RADIUS_POWER = 1.5;
