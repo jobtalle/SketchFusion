@@ -1,14 +1,21 @@
 const Gradient = function() {
+    const stops = arguments;
+
     this.createData = steps => {
         const data = new Array(steps << 2);
 
-        const start = new Color(0, 0, 0, 1);
-        const end = new Color(1, 0.5, 0.7, 1);
-
         for (let i = 0; i < steps; ++i) {
             const f = i / steps;
-            const color = start.mix(end, f);
             const index = i << 2;
+
+            let lastIndex = 0;
+
+            while (stops[lastIndex << 1] <= Math.min(0.9999, f))
+                ++lastIndex;
+
+            const firstIndex = lastIndex - 1;
+            const factor = (f - stops[firstIndex << 1]) / (stops[lastIndex << 1] - stops[firstIndex << 1]);
+            const color = stops[(firstIndex << 1) + 1].mix(stops[(lastIndex << 1) + 1], factor);
 
             data[index] = Math.round(color.r * 255);
             data[index + 1] = Math.round(color.g * 255);

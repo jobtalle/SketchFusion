@@ -9,7 +9,11 @@ const Renderer = function(canvas, clearColor) {
     const fboTexture = gl.createTexture();
     const gradient = gl.createTexture();
     const gradients = [
-        new Gradient()
+        new Gradient(
+            0, new Color(0, 0, 0, 1),
+            0.3, new Color(1, 1, 0, 1),
+            0.9, new Color(1, 0, 0, 1),
+            1, new Color(1, 0.5, 0.5, 1))
     ];
     let width = canvas.width;
     let height = canvas.height;
@@ -230,7 +234,7 @@ Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
             "if (t < flashStart)" +
                 "transparency = 0.5 * alpha * (f / flashStart);" +
             "else " +
-                "transparency = alpha * (pow(1.0 - pow(abs(f - t), 0.6), 6.5));" +
+                "transparency = alpha * (pow(1.0 - pow(abs(f - t), 0.6), 8.5));" +
         "}" +
         "else " +
             "discard;" +
@@ -251,5 +255,4 @@ Renderer.SHADER_FILTERED_FRAGMENT = Renderer.SHADER_VERSION +
     "varying mediump vec2 uv;" +
     "void main() {" +
         "gl_FragColor = texture2D(gradient, vec2(texture2D(texture, uv).r, 0));" +
-        // "gl_FragColor = 0.3 * (texture2D(texture, uv) + texture2D(texture, uv + resolution) + texture2D(texture, vec2(uv.x + resolution.x, uv.y)) + texture2D(texture, vec2(uv.x, uv.y + resolution.y)));" +
     "}";
