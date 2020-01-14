@@ -13,6 +13,10 @@ const Fusion = function(renderer, lightElement) {
     let meshIndex = 0;
     let canPrepare = false;
 
+    attractors[0] = new Attractor(
+        new Vector(),
+        Fusion.ATTRACTOR_RADIUS_CORE);
+
     for (let i = 0; i < meshes.length; ++i)
         meshes[i] = new renderer.MeshLines(trails);
 
@@ -28,7 +32,7 @@ const Fusion = function(renderer, lightElement) {
     }
 
     const makeAttractors = () => {
-        for (let i = 0; i < attractors.length; ++i)
+        for (let i = 1; i < attractors.length; ++i)
             attractors[i] = new Attractor(
                 new Vector(
                     -Fusion.ATTRACTOR_SPAWN_RADIUS + Fusion.ATTRACTOR_SPAWN_RADIUS * 2 * Math.random(),
@@ -133,6 +137,7 @@ Fusion.ALPHA_POWER = 1.6;
 Fusion.ALPHA_PROGRESS_POWER = 0.7;
 Fusion.TRAILS = 800;
 Fusion.ATTRACTORS = 5;
+Fusion.ATTRACTOR_RADIUS_CORE = 10;
 Fusion.ATTRACTOR_RADIUS_MIN = 6;
 Fusion.ATTRACTOR_RADIUS_MAX = 17.5;
 Fusion.ATTRACTOR_SPAWN_RADIUS = 70;
