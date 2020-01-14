@@ -154,7 +154,7 @@ Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
             "if (t < flashStart) " +
                 "transparency = 0.2 * position.w / t;" +
             "else " +
-                "transparency = alpha * pow(max(0.0, 1.0 - (t - position.w) * 2.0), 6.0);" +
+                "transparency = min(position.w, alpha * pow(1.0 - (t - position.w), 8.0));" +
         "}" +
         "gl_Position = transform * vec4(position.xyz * length(position.xyz) * 0.005 * pow(t, 0.3), 1.0);" +
     "}";

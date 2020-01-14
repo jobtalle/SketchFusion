@@ -111,7 +111,7 @@ const Fusion = function(renderer, lightElement) {
 
 Fusion.INTERVAL = 0.4;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
-Fusion.CYCLE_SPEED = 0.25;
+Fusion.CYCLE_SPEED = 0.2;
 Fusion.FLASH_START = 0.15;
 Fusion.FLASH_END = 0.16;
 Fusion.ALPHA_POWER = 1.5;
