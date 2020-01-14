@@ -11,12 +11,14 @@ const Renderer = function(canvas, clearColor) {
     const gradients = [
         new Gradient(
             0, new Color(0, 0, 0, 1),
-            0.3, new Color(1, 1, 0, 1),
-            0.9, new Color(1, 0, 0, 1),
+            0.4, new Color(1, 1, 0, 1),
+            0.7, new Color(1, 0, 0, 1),
             1, new Color(1, 0.5, 0.5, 1))
     ];
     let width = canvas.width;
     let height = canvas.height;
+    let targetWidth = Math.round(width * Renderer.TARGET_SCALE);
+    let targetHeight = Math.round(height * Renderer.TARGET_SCALE);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, quad);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -33,6 +35,7 @@ const Renderer = function(canvas, clearColor) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(gradients[0].createData(width)));
+
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, fboTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
@@ -43,7 +46,7 @@ const Renderer = function(canvas, clearColor) {
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fboTexture, 0);
 
     const updateFBO = () => {
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(width * height << 2));
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, targetWidth, targetHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(targetWidth * targetHeight << 2));
     };
 
     const Shader = function(vertex, fragment, uniforms, attributes) {
@@ -158,15 +161,13 @@ const Renderer = function(canvas, clearColor) {
 
     this.toBuffer = () => {
         gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-        gl.viewport(0, 0, width, height);
+        gl.viewport(0, 0, targetWidth, targetHeight);
         gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.clearColor(1, 0, 1, 1); // TODO: Debug
     };
 
     this.toMain = () => {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.viewport(0, 0, width, height);
-        gl.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a); // TODO: Debug
     };
 
     this.renderBuffer = () => {
@@ -184,6 +185,8 @@ const Renderer = function(canvas, clearColor) {
     this.resize = (w, h) => {
         width = w;
         height = h;
+        targetWidth = Math.round(width * Renderer.TARGET_SCALE);
+        targetHeight = Math.round(height * Renderer.TARGET_SCALE);
         matrixProjection.perspective(Renderer.ANGLE, w / h, Renderer.Z_NEAR, Renderer.Z_FAR);
 
         updateFBO();
@@ -212,6 +215,7 @@ const Renderer = function(canvas, clearColor) {
 Renderer.Z_NEAR = 0.1;
 Renderer.Z_FAR = 500;
 Renderer.ANGLE = Math.PI * 0.6;
+Renderer.TARGET_SCALE = 2;
 Renderer.SHADER_VERSION = "#version 100\n";
 Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +
@@ -232,9 +236,9 @@ Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
 
         "if (f < t) {" +
             "if (t < flashStart)" +
-                "transparency = 0.5 * alpha * (f / flashStart);" +
+                "transparency = 0.3 * alpha * (f / flashStart);" +
             "else " +
-                "transparency = alpha * (pow(1.0 - pow(abs(f - t), 0.6), 8.5));" +
+                "transparency = alpha * (pow(1.0 - pow(abs(f - t), 0.6), 10.0));" +
         "}" +
         "else " +
             "discard;" +

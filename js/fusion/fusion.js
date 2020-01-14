@@ -125,13 +125,13 @@ const Fusion = function(renderer, lightElement) {
 };
 
 
-Fusion.INTERVAL = 0.3;
+Fusion.INTERVAL = 0.25;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
 Fusion.CYCLE_SPEED = 0.1;
 Fusion.FLASH_START = 0.16;
 Fusion.ALPHA_POWER = 1.4;
 Fusion.ALPHA_PROGRESS_POWER = 0.7;
-Fusion.TRAILS = 800;
+Fusion.TRAILS = 1024;
 Fusion.ATTRACTORS = 5;
 Fusion.ATTRACTOR_RADIUS_MIN = 6;
 Fusion.ATTRACTOR_RADIUS_MAX = 14;
