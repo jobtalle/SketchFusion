@@ -1,5 +1,5 @@
 const Fusion = function(renderer, lightElement) {
-    const dist = 40;
+    const dist = 20;
     const from = new Vector();
     const to = new Vector(0, 0, 0);
     const up = new Vector(0, 1, 0);
@@ -98,6 +98,8 @@ const Fusion = function(renderer, lightElement) {
         renderer.clear();
         renderer.view(from, to, up);
 
+        renderer.toBuffer();
+
         let p = progress;
 
         for (let i = 0; i < Fusion.MESH_COUNT; ++i) {
@@ -111,6 +113,9 @@ const Fusion = function(renderer, lightElement) {
             if ((p += Fusion.INTERVAL) > 1)
                 break;
         }
+
+        renderer.toMain();
+        renderer.renderBuffer();
     };
 
     for (let i = 0; i < Fusion.MESH_COUNT; ++i) {
@@ -124,9 +129,9 @@ Fusion.INTERVAL = 0.3;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
 Fusion.CYCLE_SPEED = 0.1;
 Fusion.FLASH_START = 0.16;
-Fusion.ALPHA_POWER = 1.5;
+Fusion.ALPHA_POWER = 1.4;
 Fusion.ALPHA_PROGRESS_POWER = 0.7;
-Fusion.TRAILS = 800;
+Fusion.TRAILS = 1024;
 Fusion.ATTRACTORS = 5;
 Fusion.ATTRACTOR_RADIUS_MIN = 6;
 Fusion.ATTRACTOR_RADIUS_MAX = 14;

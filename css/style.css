@@ -6,12 +6,11 @@ body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background: radial-gradient(circle at center, #222222 0, #111111 100%);
 }
 
 #light {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     background: radial-gradient(circle at center, #ffffff 0, rgb(0, 0, 0) 100%);
     position: absolute;
     opacity: 0;
@@ -24,7 +23,7 @@ body {
 }
 
 #wrapper #renderer {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     position: absolute;
 }
