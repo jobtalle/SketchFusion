@@ -236,9 +236,9 @@ Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
 
         "if (f < t) {" +
             "if (t < flashStart)" +
-                "transparency = 0.3 * alpha * (f / flashStart);" +
+                "transparency = 0.2 * alpha * (f / flashStart);" +
             "else " +
-                "transparency = alpha * (pow(1.0 - pow((t - f), 0.6), 9.0));" +
+                "transparency = alpha * (pow(1.0 - pow((t - f), 0.6), 10.0));" +
         "}" +
         "else " +
             "discard;" +
