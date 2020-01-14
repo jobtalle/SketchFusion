@@ -17,11 +17,11 @@ Trail.makeGravityInfluences = function() {
     return influences;
 };
 
-Trail.STEPS = 128;
-Trail.VELOCITY_INITIAL = 0.023;
+Trail.STEPS = 64;
+Trail.VELOCITY_INITIAL = 0.05;
 Trail.VELOCITY_RANDOM = 0;
-Trail.GRAVITY_MULTIPLIER = 1.2;
-Trail.GRAVITY_POWER = 2.5;
+Trail.GRAVITY_MULTIPLIER = 3.9;
+Trail.GRAVITY_POWER = 2;
 Trail.GRAVITY_INFLUENCES = Trail.makeGravityInfluences();
 
 Trail.prototype.trace = function(attractors) {
