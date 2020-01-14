@@ -152,7 +152,7 @@ Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
             "transparency = 0.0;" +
         "else {" +
             "if (t < flashStart) " +
-                "transparency = 0.1 * position.w / t;" +
+                "transparency = 0.2 * position.w / t;" +
             "else " +
                 "transparency = alpha * pow(max(0.0, 1.0 - (t - position.w) * 2.0), 6.0);" +
         "}" +

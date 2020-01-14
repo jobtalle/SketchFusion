@@ -6,14 +6,19 @@ const Fusion = function(renderer, lightElement) {
 
     const attractors = new Array(Fusion.ATTRACTORS);
     const trails = new Array(Fusion.TRAILS);
-    const lines = new renderer.MeshLines(trails);
+    const meshes = new Array(Fusion.MESH_COUNT);
 
     let light = 0;
     let progress = 0;
+    let meshIndex = 0;
+
+    for (let i = 0; i < meshes.length; ++i)
+        meshes[i] = new renderer.MeshLines(trails);
 
     for (let i = 0; i < trails.length; ++i) {
         const r = Math.PI * 2 * i / trails.length;
         const d = 120;
+
         trails[i] = new Trail(
             new Vector(
                 Math.cos(r) * d,
@@ -35,12 +40,22 @@ const Fusion = function(renderer, lightElement) {
         for (const trail of trails)
             trail.trace(attractors);
 
-        lines.upload();
+        meshes[meshIndex].upload();
     };
 
     const prepare = () => {
+        if (++meshIndex === Fusion.MESH_COUNT)
+            meshIndex = 0;
+
         makeAttractors();
         traceTrails();
+    };
+
+    const drawMesh = (mesh, progress) => {
+        mesh.draw(
+            progress,
+            Math.pow(0.5 - 0.5 * Math.cos(Math.pow(progress, Fusion.ALPHA_PROGRESS_POWER) * (Math.PI + Math.PI)), Fusion.ALPHA_POWER),
+            Fusion.FLASH_START);
     };
 
     this.update = timeStep => {
@@ -59,8 +74,8 @@ const Fusion = function(renderer, lightElement) {
             }
         }
 
-        if (progress > 1) {
-            progress = 0;
+        if (progress > Fusion.INTERVAL) {
+            progress -= Fusion.INTERVAL;
             light = 0;
 
             prepare();
@@ -73,15 +88,29 @@ const Fusion = function(renderer, lightElement) {
 
         renderer.clear();
         renderer.view(from, to, up);
-        lines.draw(
-            progress,
-            Math.pow(0.5 - 0.5 * Math.cos(Math.pow(progress, Fusion.ALPHA_PROGRESS_POWER) * (Math.PI + Math.PI)), Fusion.ALPHA_POWER),
-            Fusion.FLASH_START);
+
+        let p = progress;
+
+        for (let i = 0; i < Fusion.MESH_COUNT; ++i) {
+            let index = meshIndex - i;
+
+            if (index < 0)
+                index += Fusion.MESH_COUNT;
+
+            drawMesh(meshes[index], p);
+
+            if ((p += Fusion.INTERVAL) > 1)
+                break;
+        }
     };
 
-    prepare();
+    for (let i = 0; i < Fusion.MESH_COUNT; ++i)
+        prepare();
 };
 
+
+Fusion.INTERVAL = 0.4;
+Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
 Fusion.CYCLE_SPEED = 0.25;
 Fusion.FLASH_START = 0.15;
 Fusion.FLASH_END = 0.16;
