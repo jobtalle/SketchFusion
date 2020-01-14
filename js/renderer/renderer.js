@@ -10,7 +10,7 @@ const Renderer = function(canvas, clearColor) {
     const gradient = gl.createTexture();
     const gradients = [
         new Gradient(
-            0, new Color(0, 0, 0, 1),
+            0, new Color(.05, .05, .05, 1),
             0.4, new Color(1, 1, 0.6, 1),
             0.7, new Color(1, 1, 1, 1),
             1, new Color(0.7, 0.7, 0.7, 1))
@@ -238,12 +238,12 @@ Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
             "if (t < flashStart)" +
                 "transparency = 0.3 * alpha * (f / flashStart);" +
             "else " +
-                "transparency = alpha * (pow(1.0 - pow(abs(f - t), 0.6), 10.0));" +
+                "transparency = alpha * (pow(1.0 - pow((t - f), 0.6), 9.0));" +
         "}" +
         "else " +
             "discard;" +
 
-        "gl_FragColor = vec4(1.0, 0.97, 0.9, transparency);" +
+        "gl_FragColor = vec4(1.0, 1.0, 1.0, transparency);" +
     "}";
 Renderer.SHADER_FILTERED_VERTEX = Renderer.SHADER_VERSION +
     "attribute vec2 vertex;" +
