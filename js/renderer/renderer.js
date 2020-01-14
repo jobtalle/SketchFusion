@@ -35,10 +35,6 @@ const Renderer = function(canvas, clearColor) {
             return this;
         };
 
-        this.free = () => {
-            gl.deleteProgram(program);
-        };
-
         for (const uniform of uniforms)
             this["u" + uniform.charAt(0).toUpperCase() + uniform.slice(1)] = gl.getUniformLocation(program, uniform);
 
@@ -110,10 +106,6 @@ const Renderer = function(canvas, clearColor) {
             gl.vertexAttribPointer(programLines.aPosition, 4, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.LINES, 0, elements);
         };
-
-        this.free = () => {
-            gl.deleteBuffer(buffer);
-        };
     };
 
     this.resize = (w, h) => {
@@ -126,9 +118,8 @@ const Renderer = function(canvas, clearColor) {
         updateMatrices();
     };
 
-    this.view = (from, to, up, angle) => {
+    this.view = (from, to, up) => {
         matrixView.lookAt(from, to, up);
-        matrixView.multiply(Matrix.makeRotateZ(angle));
 
         updateMatrices();
     };
@@ -139,15 +130,10 @@ const Renderer = function(canvas, clearColor) {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     };
 
-    this.free = () => {
-        programLines.free();
-    };
-
     gl.enable(gl.CULL_FACE);
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-    gl.getExtension("OES_element_index_uint");
 };
 
 Renderer.Z_NEAR = 0.1;
@@ -165,10 +151,12 @@ Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
         "if (position.w > t)" +
             "transparency = 0.0;" +
         "else {" +
-            "transparency = alpha * pow(max(0.0, 1.0 - (t - position.w) * 2.0), 3.0);" +
-            "if (t < flashStart) transparency = 0.1 * position.w / t;" +
+            "if (t < flashStart) " +
+                "transparency = 0.1 * position.w / t;" +
+            "else " +
+                "transparency = alpha * pow(max(0.0, 1.0 - (t - position.w) * 2.0), 6.0);" +
         "}" +
-        "gl_Position = transform * vec4(position.xyz * pow(t, 0.7) * length(position.xyz) * 0.01, 1.0);" +
+        "gl_Position = transform * vec4(position.xyz * length(position.xyz) * 0.005 * pow(t, 0.3), 1.0);" +
     "}";
 Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
     "varying mediump float transparency;" +
