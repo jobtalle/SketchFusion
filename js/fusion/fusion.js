@@ -99,6 +99,11 @@ const Fusion = function(renderer, lightElement) {
 
         renderer.toBuffer();
 
+        if (progress > Fusion.FLASH_START && progress < Fusion.FLASH_END)
+            renderer.renderGradient(
+                Math.pow(1 - (progress - Fusion.FLASH_START) / (Fusion.FLASH_END - Fusion.FLASH_START), 6),
+                2);
+
         let p = progress;
 
         for (let i = 0; i < Fusion.MESH_COUNT; ++i) {
@@ -112,11 +117,6 @@ const Fusion = function(renderer, lightElement) {
             if ((p += Fusion.INTERVAL) > 1)
                 break;
         }
-
-        if (progress > Fusion.FLASH_START && progress < Fusion.FLASH_END)
-            renderer.renderGradient(
-                Math.pow(1 - (progress - Fusion.FLASH_START) / (Fusion.FLASH_END - Fusion.FLASH_START), 6),
-                2);
 
         renderer.toMain();
         renderer.renderBuffer();
