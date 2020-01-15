@@ -184,7 +184,7 @@ const Renderer = function(canvas, clearColor, gradients) {
         gl.viewport(0, 0, width, height);
     };
 
-    this.renderBuffer = () => {
+    this.renderBuffer = t => {
         setProgram(programFilter);
 
         gl.uniform1i(programFilter.uTexture, 0);
@@ -272,7 +272,6 @@ Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
         "}" +
         "else " +
             "discard;" +
-
         "gl_FragColor = vec4(1.0, 0.0, 0.0, transparency);" +
     "}";
 Renderer.SHADER_FILTERED_VERTEX = Renderer.SHADER_VERSION +

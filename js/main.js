@@ -7,9 +7,12 @@ const gradients = [
         0.4, new Color(1, 1, 0.6, 1),
         0.7, new Color(1, 1, 1, 1),
         1, new Color(0.7, 0.7, 0.7, 1)),
-    // new Gradient(
-    //     0, new Color(0, 0, 0, 1),
-    //     1, new Color(1, 1, 1, 1))
+    new Gradient(
+        0, new Color(.06, .06, .06, 1),
+        0.1, new Color(.9, .3, .27, 1),
+        0.4, new Color(1, 1, 0.6, 1),
+        0.7, new Color(1, 1, .04, 1),
+        1, new Color(0.7, 0.9, 0.2, 1))
 ];
 const wrapper = document.getElementById("wrapper");
 const canvas = document.getElementById("renderer");
