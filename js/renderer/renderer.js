@@ -38,8 +38,8 @@ const Renderer = function(canvas, clearColor) {
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, fboTexture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
@@ -52,7 +52,7 @@ const Renderer = function(canvas, clearColor) {
     };
 
     const updateFBO = () => {
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, targetWidth, targetHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(targetWidth * targetHeight << 2));
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, targetWidth, targetHeight, 0, gl.RGBA, gl.FLOAT, new Float32Array(targetWidth * targetHeight << 2));
     };
 
     const Shader = function(vertex, fragment, uniforms, attributes) {
@@ -103,7 +103,7 @@ const Renderer = function(canvas, clearColor) {
     const programGradient = new Shader(
         Renderer.SHADER_GRADIENT_VERTEX,
         Renderer.SHADER_GRADIENT_FRAGMENT,
-        ["alpha", "power", "resolution"],
+        ["alpha", "power", "aspect"],
         ["vertex"]);
     let programCurrent = null;
 
@@ -198,7 +198,7 @@ const Renderer = function(canvas, clearColor) {
 
         gl.uniform1f(programGradient.uAlpha, alpha);
         gl.uniform1f(programGradient.uPower, power);
-        gl.uniform2f(programGradient.uResolution, 1 / width, 1 / height);
+        gl.uniform1f(programGradient.uAspect, width / height);
         gl.bindBuffer(gl.ARRAY_BUFFER, quad);
         gl.enableVertexAttribArray(programGradient.aVertex);
         gl.vertexAttribPointer(programGradient.aVertex, 2, gl.FLOAT, false, 0, 0);
@@ -232,6 +232,7 @@ const Renderer = function(canvas, clearColor) {
     gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.clearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    gl.getExtension("OES_texture_float");
 
     updateFBO();
     updateGradient();
@@ -240,7 +241,7 @@ const Renderer = function(canvas, clearColor) {
 Renderer.Z_NEAR = 0.1;
 Renderer.Z_FAR = 500;
 Renderer.ANGLE = Math.PI * 0.5;
-Renderer.TARGET_SCALE = 2;
+Renderer.TARGET_SCALE = 1;
 Renderer.GRADIENT_PRECISION = 256;
 Renderer.SHADER_VERSION = "#version 100\n";
 Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
@@ -284,7 +285,12 @@ Renderer.SHADER_FILTERED_FRAGMENT = Renderer.SHADER_VERSION +
     "uniform sampler2D gradient;" +
     "varying mediump vec2 uv;" +
     "void main() {" +
-        "gl_FragColor = texture2D(gradient, vec2(texture2D(texture, uv).r, 0));" +
+        "mediump float p =" +
+            "texture2D(texture, uv + vec2(1.0, 0.0) * resolution).r +" +
+            "texture2D(texture, uv + vec2(0.0, 1.0) * resolution).r +" +
+            "texture2D(texture, uv + vec2(-1.0, 0.0) * resolution).r +" +
+            "texture2D(texture, uv + vec2(1.0, -1.0) * resolution).r;" +
+        "gl_FragColor = texture2D(gradient, vec2(texture2D(texture, uv).r * 0.5 + 0.125 * p, 0));" +
     "}";
 Renderer.SHADER_GRADIENT_VERTEX = Renderer.SHADER_VERSION +
     "attribute vec2 vertex;" +
@@ -296,10 +302,9 @@ Renderer.SHADER_GRADIENT_VERTEX = Renderer.SHADER_VERSION +
 Renderer.SHADER_GRADIENT_FRAGMENT = Renderer.SHADER_VERSION +
     "uniform mediump float alpha;" +
     "uniform mediump float power;" +
-    "uniform mediump vec2 resolution;" +
+    "uniform mediump float aspect;" +
     "varying mediump vec2 position;" +
     "void main() {" +
-        "mediump float aspect = resolution.y / resolution.x;" +
-        "mediump float distance = length((vec2(0.5) - vec2(position.x, position.y)) * vec2(2.0 * aspect, 2.0));" +
+        "mediump float distance = min(1.0, length((vec2(0.5) - vec2(position.x, position.y)) * vec2(2.0 * aspect, 2.0)));" +
         "gl_FragColor = vec4(vec3(pow(1.0 - distance, power)), alpha);" +
     "}";

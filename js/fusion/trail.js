@@ -19,7 +19,7 @@ Trail.makeGravityInfluences = function() {
 
 Trail.STEPS = 64;
 Trail.VELOCITY_INITIAL = 0.05;
-Trail.GRAVITY_MULTIPLIER = 3.9;
+Trail.GRAVITY_MULTIPLIER = 3.3;
 Trail.GRAVITY_POWER = 2;
 Trail.GRAVITY_INFLUENCES = Trail.makeGravityInfluences();
 
