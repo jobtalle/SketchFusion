@@ -47,7 +47,7 @@ const Renderer = function(canvas, clearColor) {
 
     const updateGradient = () => {
         gl.bindTexture(gl.TEXTURE_2D, gradient);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(gradients[0].createData(width)));
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, Renderer.GRADIENT_PRECISION, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(gradients[0].createData(Renderer.GRADIENT_PRECISION)));
         gl.bindTexture(gl.TEXTURE_2D, fboTexture);
     };
 
@@ -239,8 +239,9 @@ const Renderer = function(canvas, clearColor) {
 
 Renderer.Z_NEAR = 0.1;
 Renderer.Z_FAR = 500;
-Renderer.ANGLE = Math.PI * 0.6;
+Renderer.ANGLE = Math.PI * 0.5;
 Renderer.TARGET_SCALE = 2;
+Renderer.GRADIENT_PRECISION = 256;
 Renderer.SHADER_VERSION = "#version 100\n";
 Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +

@@ -7,6 +7,7 @@ const Fusion = function(renderer, lightElement) {
     const trails = new Array(Fusion.TRAILS);
     const meshes = new Array(Fusion.MESH_COUNT);
 
+    let flash = 0;
     let light = 0;
     let progress = 0;
     let meshIndex = 0;
@@ -66,6 +67,7 @@ const Fusion = function(renderer, lightElement) {
 
     this.update = timeStep => {
         progress += timeStep * Fusion.CYCLE_SPEED;
+        flash -= timeStep * Fusion.FLASH_TIME;
 
         if (canPrepare) {
             prepare();
@@ -77,6 +79,7 @@ const Fusion = function(renderer, lightElement) {
             if (progress > Fusion.FLASH_START) {
                 lightElement.classList.add("active");
                 light = 1;
+                flash = 1;
                 canPrepare = true;
             }
         }
@@ -98,11 +101,9 @@ const Fusion = function(renderer, lightElement) {
         renderer.view(from, to, up);
 
         renderer.toBuffer();
-
-        if (progress > Fusion.FLASH_START && progress < Fusion.FLASH_END)
-            renderer.renderGradient(
-                Math.pow(1 - (progress - Fusion.FLASH_START) / (Fusion.FLASH_END - Fusion.FLASH_START), 6),
-                2);
+        renderer.renderGradient(
+            Math.pow(flash, Fusion.FLASH_POWER),
+            Fusion.FLASH_GRADIENT_POWER);
 
         let p = progress;
 
@@ -136,7 +137,9 @@ Fusion.INTERVAL = 0.3;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
 Fusion.CYCLE_SPEED = 0.1;
 Fusion.FLASH_START = 0.14;
-Fusion.FLASH_END = 0.3;
+Fusion.FLASH_TIME = Fusion.INTERVAL * 0.8;
+Fusion.FLASH_POWER = 7;
+Fusion.FLASH_GRADIENT_POWER = 3;
 Fusion.ALPHA_POWER = 1.6;
 Fusion.ALPHA_PROGRESS_POWER = 0.7;
 Fusion.TRAILS = 800;
