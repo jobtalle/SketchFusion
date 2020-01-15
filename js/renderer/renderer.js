@@ -168,7 +168,13 @@ const Renderer = function(canvas, clearColor, gradients) {
     };
 
     this.randomizeGradient = () => {
-        gradientIndex = Math.floor(Math.random() * gradients.length);
+        if (gradients.length === 1)
+            return;
+
+        const previous = gradientIndex;
+
+        while (gradientIndex === previous)
+            gradientIndex = Math.floor(Math.random() * gradients.length);
 
         updateGradient();
     };
