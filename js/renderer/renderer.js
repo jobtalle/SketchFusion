@@ -245,7 +245,7 @@ Renderer.Z_NEAR = 0.1;
 Renderer.Z_FAR = 500;
 Renderer.ANGLE = Math.PI * 0.5;
 Renderer.TARGET_SCALE = 1;
-Renderer.GRADIENT_PRECISION = 256;
+Renderer.GRADIENT_PRECISION = 80;
 Renderer.SHADER_VERSION = "#version 100\n";
 Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
     "uniform mat4 transform;" +
@@ -254,7 +254,7 @@ Renderer.SHADER_LINES_VERTEX = Renderer.SHADER_VERSION +
     "varying mediump float f;" +
     "void main() {" +
         "f = position.w;" +
-        "gl_Position = transform * vec4(position.xyz * length(position.xyz) * 0.008 * pow(t, 0.2), 1.0);" +
+        "gl_Position = transform * vec4(position.xyz * length(position.xyz) * 0.008 * pow(t, 0.3), 1.0);" +
     "}";
 Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
     "uniform mediump float t;" +
@@ -266,9 +266,9 @@ Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
 
         "if (f < t) {" +
             "if (t < flashStart)" +
-                "transparency = 0.4 * alpha * (f / flashStart);" +
+                "transparency = 0.5 * alpha * (f / flashStart);" +
             "else " +
-                "transparency = alpha * (pow(1.0 - pow((t - f), 0.6), 10.0));" +
+                "transparency = alpha * (pow(1.0 - pow((t - f), 0.6), 11.0));" +
         "}" +
         "else " +
             "discard;" +

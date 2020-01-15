@@ -12,6 +12,7 @@ const Fusion = function(renderer, lightElement, width, height) {
     let progress = 0;
     let meshIndex = 0;
     let canPrepare = false;
+    let traceIndex = 0;
 
     attractors[0] = new Attractor(
         new Vector(),
@@ -41,21 +42,26 @@ const Fusion = function(renderer, lightElement, width, height) {
                     Math.pow(Math.random(), Fusion.ATTRACTOR_SPAWN_RADIUS_POWER));
     };
 
-    const traceTrails = () => {
-        for (const trail of trails)
-            trail.trace(attractors);
+    const traceTrails = factor => {
+        while (traceIndex < trails.length * factor)
+            trails[traceIndex++].trace(attractors);
+    };
 
+    const uploadTrails = () => {
         meshes[(meshIndex + 1) % Fusion.MESH_COUNT].upload();
     };
 
     const prepare = () => {
+        traceTrails(1);
+        uploadTrails();
         makeAttractors();
-        traceTrails();
     };
 
     const nextMesh = () => {
         if (++meshIndex === Fusion.MESH_COUNT)
             meshIndex = 0;
+
+        traceIndex = 0;
     };
 
     const drawMesh = (mesh, progress) => {
@@ -85,6 +91,8 @@ const Fusion = function(renderer, lightElement, width, height) {
                 if (Math.random() < Fusion.GRADIENT_CHANGE_CHANCE)
                     renderer.randomizeGradient();
             }
+            else
+                traceTrails(progress / Fusion.FLASH_START);
         }
         else if (light === 1) {
             lightElement.classList.remove("active");
@@ -108,17 +116,16 @@ const Fusion = function(renderer, lightElement, width, height) {
             Math.pow(flash, Fusion.FLASH_POWER),
             Fusion.FLASH_GRADIENT_POWER);
 
-        let p = progress;
-
         for (let i = 0; i < Fusion.MESH_COUNT; ++i) {
+            const meshProgress = progress + Fusion.INTERVAL * i;
             let index = meshIndex - i;
 
             if (index < 0)
                 index += Fusion.MESH_COUNT;
 
-            drawMesh(meshes[index], p);
+            drawMesh(meshes[index], meshProgress);
 
-            if ((p += Fusion.INTERVAL) > 1)
+            if (meshProgress > 1 - Fusion.INTERVAL)
                 break;
         }
 
@@ -131,6 +138,8 @@ const Fusion = function(renderer, lightElement, width, height) {
             mesh.free();
     };
 
+    makeAttractors();
+
     for (let i = 0; i < Fusion.MESH_COUNT; ++i) {
         prepare();
         nextMesh();
@@ -140,7 +149,7 @@ const Fusion = function(renderer, lightElement, width, height) {
 Fusion.ZOOM = 25;
 Fusion.TRAIL_Z = -15;
 Fusion.TRAILS_RADIUS = 90;
-Fusion.INTERVAL = 0.35;
+Fusion.INTERVAL = 0.334;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
 Fusion.CYCLE_SPEED = 0.11;
 Fusion.GRADIENT_CHANGE_CHANCE = 0.7;
@@ -154,6 +163,6 @@ Fusion.TRAILS_PER_PIXEL = 0.00038;
 Fusion.ATTRACTORS = 5;
 Fusion.ATTRACTOR_RADIUS_CORE = 10;
 Fusion.ATTRACTOR_RADIUS_MIN = 6;
-Fusion.ATTRACTOR_RADIUS_MAX = 17.5;
-Fusion.ATTRACTOR_SPAWN_RADIUS = 70;
+Fusion.ATTRACTOR_RADIUS_MAX = 19;
+Fusion.ATTRACTOR_SPAWN_RADIUS = 60;
 Fusion.ATTRACTOR_SPAWN_RADIUS_POWER = 2.5;
