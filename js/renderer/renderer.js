@@ -130,7 +130,7 @@ const Renderer = function(canvas, clearColor) {
 
     this.MeshLines = function(trails) {
         const buffer = gl.createBuffer();
-        const elements = Fusion.TRAILS * (Trail.STEPS - 1);
+        const elements = trails.length * (Trail.STEPS - 1);
         const data = new Array(elements * 8);
         const factors = new Array(Trail.STEPS);
 
@@ -167,6 +167,10 @@ const Renderer = function(canvas, clearColor) {
             gl.enableVertexAttribArray(programLines.aPosition);
             gl.vertexAttribPointer(programLines.aPosition, 4, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.LINES, 0, (Math.ceil(Trail.STEPS * progress) * trails.length) << 1);
+        };
+
+        this.free = () => {
+            gl.deleteBuffer(buffer);
         };
     };
 

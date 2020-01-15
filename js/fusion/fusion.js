@@ -1,10 +1,10 @@
-const Fusion = function(renderer, lightElement) {
+const Fusion = function(renderer, lightElement, width, height) {
     const from = new Vector(0, 0, Fusion.ZOOM);
     const to = new Vector(0, 0, 0);
     const up = new Vector(0, 1, 0);
 
     const attractors = new Array(Fusion.ATTRACTORS);
-    const trails = new Array(Fusion.TRAILS);
+    const trails = new Array(Math.ceil(Fusion.TRAILS_PER_PIXEL * width * height));
     const meshes = new Array(Fusion.MESH_COUNT);
 
     let flash = 0;
@@ -123,12 +123,16 @@ const Fusion = function(renderer, lightElement) {
         renderer.renderBuffer();
     };
 
+    this.free = () => {
+        for (const mesh of meshes)
+            mesh.free();
+    };
+
     for (let i = 0; i < Fusion.MESH_COUNT; ++i) {
         prepare();
         nextMesh();
     }
 };
-
 
 Fusion.ZOOM = 25;
 Fusion.TRAIL_Z = -15;
@@ -142,7 +146,7 @@ Fusion.FLASH_POWER = 7;
 Fusion.FLASH_GRADIENT_POWER = 3;
 Fusion.ALPHA_POWER = 1.6;
 Fusion.ALPHA_PROGRESS_POWER = 0.7;
-Fusion.TRAILS = 500;
+Fusion.TRAILS_PER_PIXEL = 0.00038;
 Fusion.ATTRACTORS = 5;
 Fusion.ATTRACTOR_RADIUS_CORE = 10;
 Fusion.ATTRACTOR_RADIUS_MIN = 6;

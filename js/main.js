@@ -4,7 +4,7 @@ const wrapper = document.getElementById("wrapper");
 const canvas = document.getElementById("renderer");
 const light = document.getElementById("light");
 const renderer = new Renderer(canvas, new Color(0, 0, 0, 1));
-const fusion = new Fusion(renderer, light);
+let fusion = new Fusion(renderer, light, canvas.width, canvas.height);
 let lastDate = new Date();
 
 const resize = () => {
@@ -12,6 +12,8 @@ const resize = () => {
     canvas.height = wrapper.offsetHeight;
 
     renderer.resize(canvas.width, canvas.height);
+    fusion.free();
+    fusion = new Fusion(renderer, light, canvas.width, canvas.height);
 };
 
 const update = timeStep => {
