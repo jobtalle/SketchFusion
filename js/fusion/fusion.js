@@ -81,6 +81,9 @@ const Fusion = function(renderer, lightElement, width, height) {
                 light = 1;
                 flash = 1;
                 canPrepare = true;
+
+                if (Math.random() < Fusion.GRADIENT_CHANGE_CHANCE)
+                    renderer.randomizeGradient();
             }
         }
         else if (light === 1) {
@@ -136,14 +139,15 @@ const Fusion = function(renderer, lightElement, width, height) {
 
 Fusion.ZOOM = 25;
 Fusion.TRAIL_Z = -15;
-Fusion.TRAILS_RADIUS = 100;
-Fusion.INTERVAL = 0.3;
+Fusion.TRAILS_RADIUS = 90;
+Fusion.INTERVAL = 0.35;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
-Fusion.CYCLE_SPEED = 0.1;
-Fusion.FLASH_START = 0.14;
+Fusion.CYCLE_SPEED = 0.11;
+Fusion.GRADIENT_CHANGE_CHANCE = 0.5;
+Fusion.FLASH_START = 0.135;
 Fusion.FLASH_TIME = Fusion.INTERVAL;
 Fusion.FLASH_POWER = 7;
-Fusion.FLASH_GRADIENT_POWER = 3;
+Fusion.FLASH_GRADIENT_POWER = 2.8;
 Fusion.ALPHA_POWER = 1.6;
 Fusion.ALPHA_PROGRESS_POWER = 0.7;
 Fusion.TRAILS_PER_PIXEL = 0.00038;

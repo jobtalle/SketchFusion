@@ -1,4 +1,4 @@
-const Renderer = function(canvas, clearColor) {
+const Renderer = function(canvas, clearColor, gradients) {
     const gl = canvas.getContext("webgl", {"antialias": false}) || canvas.getContext("experimental-webgl", {"antialias": false});
     const matrixBuffer = new Array(16);
     const matrixProjection = new Matrix();
@@ -8,18 +8,11 @@ const Renderer = function(canvas, clearColor) {
     const framebuffer = gl.createFramebuffer();
     const fboTexture = gl.createTexture();
     const gradient = gl.createTexture();
-    const gradients = [
-        new Gradient(
-            0, new Color(.06, .06, .06, 1),
-            0.1, new Color(.2, .2, .27, 1),
-            0.4, new Color(1, 1, 0.6, 1),
-            0.7, new Color(1, 1, 1, 1),
-            1, new Color(0.7, 0.7, 0.7, 1))
-    ];
     let width = canvas.width;
     let height = canvas.height;
     let targetWidth = Math.round(width * Renderer.TARGET_SCALE);
     let targetHeight = Math.round(height * Renderer.TARGET_SCALE);
+    let gradientIndex = Math.floor(Math.random() * gradients.length);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, quad);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -47,7 +40,7 @@ const Renderer = function(canvas, clearColor) {
 
     const updateGradient = () => {
         gl.bindTexture(gl.TEXTURE_2D, gradient);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, Renderer.GRADIENT_PRECISION, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(gradients[0].createData(Renderer.GRADIENT_PRECISION)));
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, Renderer.GRADIENT_PRECISION, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(gradients[gradientIndex].createData(Renderer.GRADIENT_PRECISION)));
         gl.bindTexture(gl.TEXTURE_2D, fboTexture);
     };
 
@@ -174,6 +167,12 @@ const Renderer = function(canvas, clearColor) {
         };
     };
 
+    this.randomizeGradient = () => {
+        gradientIndex = Math.floor(Math.random() * gradients.length);
+
+        updateGradient();
+    };
+
     this.toBuffer = () => {
         gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
         gl.viewport(0, 0, targetWidth, targetHeight);
@@ -274,7 +273,7 @@ Renderer.SHADER_LINES_FRAGMENT = Renderer.SHADER_VERSION +
         "else " +
             "discard;" +
 
-        "gl_FragColor = vec4(1.0, 1.0, 1.0, transparency);" +
+        "gl_FragColor = vec4(1.0, 0.0, 0.0, transparency);" +
     "}";
 Renderer.SHADER_FILTERED_VERTEX = Renderer.SHADER_VERSION +
     "attribute vec2 vertex;" +
@@ -310,5 +309,5 @@ Renderer.SHADER_GRADIENT_FRAGMENT = Renderer.SHADER_VERSION +
     "varying mediump vec2 position;" +
     "void main() {" +
         "mediump float distance = min(1.0, length((vec2(0.5) - vec2(position.x, position.y)) * vec2(2.0 * aspect, 2.0)));" +
-        "gl_FragColor = vec4(vec3(pow(1.0 - distance, power)), alpha);" +
+        "gl_FragColor = vec4(pow(1.0 - distance, power), 0.0, 0.0, alpha);" +
     "}";
