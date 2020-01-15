@@ -133,7 +133,7 @@ const Renderer = function(canvas, clearColor, gradients) {
         this.upload = () => {
             for (let i = 1; i < Trail.STEPS; ++i) for (let trail = 0; trail < trails.length; ++trail) {
                 const ip = i - 1;
-                const index = ip * trails.length * 8 + 8 * trail;
+                const index = (ip * trails.length + trail) << 3;
 
                 data[index] = trails[trail].points[ip].x;
                 data[index + 1] = trails[trail].points[ip].y;
