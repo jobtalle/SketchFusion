@@ -152,6 +152,9 @@ const Renderer = function(canvas, clearColor, gradients) {
         this.draw = (progress, alpha, flashStart) => {
             setProgram(programLines);
 
+            const last = Math.ceil(Trail.STEPS * progress) * trails.length;
+            const first = Math.max(0, last - trails.length * Trail.STEPS * 0.334);
+
             gl.uniform1f(programLines.uT, progress);
             gl.uniform1f(programLines.uAlpha, alpha);
             gl.uniform1f(programLines.uFlashStart, flashStart);
@@ -159,7 +162,7 @@ const Renderer = function(canvas, clearColor, gradients) {
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
             gl.enableVertexAttribArray(programLines.aPosition);
             gl.vertexAttribPointer(programLines.aPosition, 4, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.LINES, 0, (Math.ceil(Trail.STEPS * progress) * trails.length) << 1);
+            gl.drawArrays(gl.LINES, first << 1, (last - first) << 1);
         };
 
         this.free = () => {
