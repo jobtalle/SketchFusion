@@ -12,7 +12,7 @@ const Renderer = function(canvas, clearColor, gradients) {
     let height = canvas.height;
     let targetWidth = Math.round(width * Renderer.TARGET_SCALE);
     let targetHeight = Math.round(height * Renderer.TARGET_SCALE);
-    let gradientIndex = Math.floor(Math.random() * gradients.length);
+    let gradientIndex = 0;
 
     gl.bindBuffer(gl.ARRAY_BUFFER, quad);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -174,7 +174,7 @@ const Renderer = function(canvas, clearColor, gradients) {
         const previous = gradientIndex;
 
         while (gradientIndex === previous)
-            gradientIndex = Math.floor(Math.random() * gradients.length);
+            gradientIndex = Math.floor(Math.pow(Math.random(), 2.5) * gradients.length);
 
         updateGradient();
     };

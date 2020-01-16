@@ -87,9 +87,7 @@ const Fusion = function(renderer, lightElement, width, height) {
                 light = 1;
                 flash = 1;
                 canPrepare = true;
-
-                if (Math.random() < Fusion.GRADIENT_CHANGE_CHANCE)
-                    renderer.randomizeGradient();
+                renderer.randomizeGradient();
             }
             else
                 traceTrails(progress / Fusion.FLASH_START);
@@ -152,7 +150,6 @@ Fusion.TRAILS_RADIUS = 90;
 Fusion.INTERVAL = 0.334;
 Fusion.MESH_COUNT = Math.ceil(1 / Fusion.INTERVAL);
 Fusion.CYCLE_SPEED = 0.11;
-Fusion.GRADIENT_CHANGE_CHANCE = 1;
 Fusion.FLASH_START = 0.135;
 Fusion.FLASH_TIME = Fusion.INTERVAL;
 Fusion.FLASH_POWER = 7;
