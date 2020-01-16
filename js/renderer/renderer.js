@@ -153,7 +153,7 @@ const Renderer = function(canvas, clearColor, gradients) {
             setProgram(programLines);
 
             const last = Math.ceil(Trail.STEPS * progress) * trails.length;
-            const first = Math.max(0, last - trails.length * Trail.STEPS * 0.334);
+            const first = Math.max(0, last - trails.length * Math.floor(Trail.STEPS * 0.334));
 
             gl.uniform1f(programLines.uT, progress);
             gl.uniform1f(programLines.uAlpha, alpha);
